@@ -24,53 +24,53 @@ const AddEditTravelStory = ({
   const [error, setError] = useState("");
 
   const updateTravelStory = async () => {
-    const storyId = storyInfo._id;
-
+    const storyId = storyInfo._id;  // Get the story ID
     console.log("Story ID:", storyId);
+  
     try {
-
-      let imageUrl =storyInfo.imageUrl ||  "";
-
+      // Prepare the data to update the travel story
       let postData = {
         title,
-        story,
-        imageUrl: storyInfo.imageUrl || "",
+        story,  // Assuming 'story' is the description you're editing
+        imageUrl: storyInfo.imageUrl || null,  // Use the existing image URL if available
         visitedLocation,
         visitedDate: visitedDate
-          ? moment(visitedDate).valueOf()
-          : moment().valueOf(),
-      }
-
-      if(storyImg)
-      {
-        //Upload new image
+          ? moment(visitedDate).valueOf()  // Convert date to timestamp if provided
+          : moment().valueOf(),  // Default to current time if no date is provided
+      };
+  
+      // Check if a new image is provided for upload
+      if (storyImg && typeof storyImg === 'object') {
+        // Upload the new image
         const imgUploadsRes = await uploadImage(storyImg);
-        imageUrl = imgUploadsRes.imageUrl || "";
-
-        postData = {
-          ...postData,
-          imageUrl: imageUrl,
-        };
+  
+        // If image upload succeeds, update the image URL in postData
+        postData.imageUrl = imgUploadsRes.imageUrl || storyInfo.imageUrl;
       }
-
+  
+      // Make a PUT request to update the travel story
       const response = await axiosInstance.put("/edit-story/" + storyId, postData);
-
+  
+      // Handle the response after a successful update
       if (response.data && response.data.story) {
         toast.success("Story Updated Successfully");
-        //Refresh Stories
+        
+        // Refresh the list of travel stories
         getAllTravelStories();
-        //Close modal or form
+  
+        // Close the modal or form after update
         onClose();
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.message)
-      {
-        setError(error.response.data.message);
+      // Error handling
+      if (error.response && error.response.data && error.response.data.message) {
+        setError(error.response.data.message);  // Show specific error message
       } else {
-        setError("An unexpected Error Occured. Please try again.");
+        setError("An unexpected Error Occurred. Please try again.");  // Generic error message
       }
     }
- };
+  };
+  
 
   const addNewTravelStory = async () => {
     try {
